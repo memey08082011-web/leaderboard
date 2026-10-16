@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GEMAS MBG - Rekap Berat Sampah Organik</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gemas: {
+                            100: '#FFFEA0', // Light Cream Yellow
+                            200: '#F0F7EA', // Light Soft Sage
+                            300: '#EEE59F', // Soft Khaki Yellow
+                            400: '#AAD480', // Soft Fresh Green
+                            500: '#75C97F', // Medium Muted Green
+                            dark: '#2D4A27'  // Deep Forest Green for text contrast
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F0F7EA;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: #2D4A27;
+        }
+        .bg-custom-gradient {
+            background: linear-gradient(135deg, #75C97F 0%, #AAD480 100%);
+        }
+        .badge-gold { background-color: #FFFEA0; color: #5B4800; border: 1px solid #EEE59F; }
+        .badge-silver { background-color: #E2E8F0; color: #334155; }
+        .badge-bronze { background-color: #FED7AA; color: #7C2D12; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-12">
+
+    <!-- Header / Navbar -->
+    <header class="bg-custom-gradient text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-4xl mx-auto px-4 py-4 sm:px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+                    <i class="fa-solid font-bold fa-leaf text-2xl text-yellow-200"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black tracking-wider text-white drop-shadow-sm">GEMAS MBG</h1>
+                    <p class="text-xs text-white/90 font-medium">Sistem Skor Pemilahan Sampah Organik</p>
+                </div>
+            </div>
+            
+            <!-- Admin Controls -->
+            <div id="admin-header-controls">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub Header Banner -->
+    <section class="bg-gemas-300/40 border-b border-gemas-400/30 py-4 px-4">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-lg sm:text-xl font-bold text-gemas-dark flex items-center justify-center gap-2">
+                <i class="fa-solid fa-scale-balanced text-gemas-500"></i>
+                <span>Berat sampah mbg organik yang sudah dipilah</span>
+            </h2>
+            <p class="text-xs text-gemas-dark/80 mt-1 font-medium">
+                🏆 Peringkat teratas (ke-1) adalah kelas dengan akumulasi sampah <span class="font-bold underline">PALING SEDIKIT</span>.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto px-4 mt-6 flex-1 w-full">
+
+        <!-- Top Statistics & Admin Actions -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gemas-400/30 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gemas-100 flex items-center justify-center text-gemas-dark font-bold">
+                    <i class="fa-solid fa-school text-lg text-emerald-700"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Total Kelas</p>
+                    <p class="text-lg font-bold text-gemas-dark">33 Kelas</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-gemas-400/30 flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gemas-400/30 flex items-center justify-center text-gemas-dark font-bold">
+                    <i class="fa-solid fa-weight-hanging text-lg text-emerald-800"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Total Sampah</p>
+                    <p id="total-weight-display" class="text-lg font-bold text-gemas-dark">0 Kg</p>
+                </div>
+            </div>
+
+            <div class="col-span-2 sm:col-span-1 bg-white p-3.5 rounded-2xl shadow-sm border border-gemas-400/30 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 font-semibold">Status Akses</p>
+                    <span id="access-badge" class="inline-block mt-0.5 px-2.5 py-0.5 text-xs rounded-full bg-gray-200 text-gray-700 font-bold">
+                        Public View
+                    </span>
+                </div>
+                <button id="admin-act-btn" onclick="openLoginModal()" class="px-3 py-2 bg-gemas-500 hover:bg-gemas-500/90 text-white font-bold text-xs rounded-xl shadow transition active:scale-95 flex items-center gap-1.5">
+                    <i class="fa-solid fa-lock"></i>
+                    <span>Login Admin</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs & Actions -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center mb-6">
+            <!-- Filter Tabs -->
+            <div class="flex bg-white/80 p-1 rounded-2xl border border-gemas-400/30 shadow-sm overflow-x-auto no-scrollbar">
+                <button onclick="switchTab('ALL')" id="tab-ALL" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-gemas-dark bg-gemas-100 shadow-sm">
+                    Semua
+                </button>
+                <button onclick="switchTab('X')" id="tab-X" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-gray-600 hover:text-gemas-dark">
+                    Kelas X
+                </button>
+                <button onclick="switchTab('XI')" id="tab-XI" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-gray-600 hover:text-gemas-dark">
+                    Kelas XI
+                </button>
+                <button onclick="switchTab('XII')" id="tab-XII" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-gray-600 hover:text-gemas-dark">
+                    Kelas XII
+                </button>
+                <button onclick="switchTab('VIOLATION')" id="tab-VIOLATION" class="tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-red-600 hover:bg-red-50 flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Pelanggaran</span>
+                    <span id="violation-badge" class="ml-1 px-1.5 py-0.2 bg-red-600 text-white text-[10px] rounded-full hidden">0</span>
+                </button>
+            </div>
+
+            <!-- Red Admin Violation Button -->
+            <button id="admin-violation-btn" onclick="openViolationModal()" class="hidden px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs sm:text-sm rounded-2xl shadow-md hover:shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-triangle-exclamation text-amber-300"></i>
+                <span>Lapor Pelanggaran</span>
+            </button>
+        </div>
+
+        <!-- Leaderboard List View -->
+        <div id="leaderboard-container" class="space-y-3">
+            <!-- Cards will be populated by JS -->
+        </div>
+
+        <!-- Violation List View (Hidden by default) -->
+        <div id="violation-container" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border border-red-200 shadow-sm">
+                <div class="flex items-center justify-between mb-4 border-b pb-3 border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-list text-red-600 text-lg"></i>
+                        <h3 class="font-bold text-gemas-dark text-base">Daftar Pelanggaran Kelas (Laporan Panitia)</h3>
+                    </div>
+                    <span class="text-xs text-gray-500 font-medium" id="violation-count-text">0 Laporan</span>
+                </div>
+                <div id="violation-list" class="space-y-3">
+                    <!-- Violation items injected here -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto pt-8 text-center text-xs text-gray-500">
+        <p class="font-semibold text-gemas-dark/70">GEMAS MBG &copy; 2026 - Gerakan Memilah Sampah Organik</p>
+        <p class="mt-1 text-[11px] text-gray-400">Peringkat Teratas = Bobot Sampah Terkecil (Kg)</p>
+    </footer>
+
+    <!-- MODAL 1: LOGIN ADMIN -->
+    <div id="login-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gemas-400/40 transform transition-all">
+            <div class="text-center mb-5">
+                <div class="w-12 h-12 bg-gemas-100 text-gemas-dark rounded-2xl flex items-center justify-center mx-auto mb-2 text-xl font-bold">
+                    <i class="fa-solid fa-user-shield text-emerald-700"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gemas-dark">Masuk Mode Admin</h3>
+                <p class="text-xs text-gray-500">Masukkan password untuk mengedit skor & lapor kelas</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Password Admin</label>
+                    <input type="password" id="admin-pass-input" placeholder="Masukkan password..." 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gemas-500 focus:outline-none text-sm font-medium">
+                    <p id="login-error" class="text-xs text-red-600 mt-1.5 hidden font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-circle-exclamation"></i> Password salah! Coba lagi.
+                    </p>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeLoginModal()" class="flex-1 py-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 text-xs font-bold text-white bg-gemas-500 hover:bg-gemas-500/90 rounded-xl shadow transition">
+                        Masuk
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 2: EDIT SKOR KELAS -->
+    <div id="edit-score-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl border border-gemas-400/40">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b">
+                <h3 id="edit-modal-title" class="text-base font-bold text-gemas-dark">Edit Skor Kelas</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="saveScoreEdit(event)">
+                <input type="hidden" id="edit-class-id">
+                
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-700 mb-2">Berat Sampah Organik (Kg)</label>
+                    <div class="relative">
+                        <!-- Standard text/number keyboard input as required -->
+                        <input type="number" step="0.01" min="0" id="edit-score-input" required placeholder="0.0" 
+                            class="w-full px-4 py-3 pr-12 border-2 border-gemas-400/50 rounded-xl text-lg font-bold text-gemas-dark focus:ring-2 focus:ring-gemas-500 focus:outline-none">
+                        <span class="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-sm text-gray-500">Kg</span>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-2">
+                        <i class="fa-solid fa-keyboard text-gemas-500"></i> Ketik angka secara manual menggunakan keyboard HP/Keyboard Anda.
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeEditModal()" class="flex-1 py-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 text-xs font-bold text-white bg-gemas-500 hover:bg-gemas-500/90 rounded-xl shadow transition">
+                        Simpan Skor
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 3: LAPOR PELANGGARAN -->
+    <div id="violation-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-red-200">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-red-100">
+                <div class="flex items-center gap-2 text-red-600">
+                    <i class="fa-solid fa-triangle-exclamation text-lg"></i>
+                    <h3 class="text-base font-bold">Lapor Pelanggaran Kelas</h3>
+                </div>
+                <button onclick="closeViolationModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form onsubmit="submitViolation(event)">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Pilih Kelas</label>
+                    <select id="violation-class-select" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm font-semibold bg-white">
+                        <!-- Options generated by JS -->
+                    </select>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Detail Pelanggaran</label>
+                    <textarea id="violation-desc-input" rows="3" required placeholder="Contoh: Sampah anorganik tercampur di tong organik / Terlambat menyetorkan..."
+                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm font-medium"></textarea>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeViolationModal()" class="flex-1 py-3 text-xs font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="flex-1 py-3 text-xs font-bold text-white bg-red-600 hover:bg-red-700 rounded-xl shadow transition">
+                        Kirim Laporan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Message -->
+    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-gemas-dark text-white px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 z-50 text-xs font-semibold">
+        <i id="toast-icon" class="fa-solid fa-circle-check text-gemas-100"></i>
+        <span id="toast-message">Notifikasi</span>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Default initial data for 33 classes (X-1..11, XI-1..11, XII-1..11)
+        const DEFAULT_CLASSES = [
+            // Angkatan X
+            { id: 'X-1', grade: 'X', number: 1, name: 'Kelas X-1', score: 2.5 },
+            { id: 'X-2', grade: 'X', number: 2, name: 'Kelas X-2', score: 1.8 },
+            { id: 'X-3', grade: 'X', number: 3, name: 'Kelas X-3', score: 3.2 },
+            { id: 'X-4', grade: 'X', number: 4, name: 'Kelas X-4', score: 0.9 },
+            { id: 'X-5', grade: 'X', number: 5, name: 'Kelas X-5', score: 4.1 },
+            { id: 'X-6', grade: 'X', number: 6, name: 'Kelas X-6', score: 2.1 },
+            { id: 'X-7', grade: 'X', number: 7, name: 'Kelas X-7', score: 1.4 },
+            { id: 'X-8', grade: 'X', number: 8, name: 'Kelas X-8', score: 3.8 },
+            { id: 'X-9', grade: 'X', number: 9, name: 'Kelas X-9', score: 2.9 },
+            { id: 'X-10', grade: 'X', number: 10, name: 'Kelas X-10', score: 1.2 },
+            { id: 'X-11', grade: 'X', number: 11, name: 'Kelas X-11', score: 2.7 },
+
+            // Angkatan XI
+            { id: 'XI-1', grade: 'XI', number: 1, name: 'Kelas XI-1', score: 1.5 },
+            { id: 'XI-2', grade: 'XI', number: 2, name: 'Kelas XI-2', score: 2.0 },
+            { id: 'XI-3', grade: 'XI', number: 3, name: 'Kelas XI-3', score: 0.8 },
+            { id: 'XI-4', grade: 'XI', number: 4, name: 'Kelas XI-4', score: 3.5 },
+            { id: 'XI-5', grade: 'XI', number: 5, name: 'Kelas XI-5', score: 2.3 },
+            { id: 'XI-6', grade: 'XI', number: 6, name: 'Kelas XI-6', score: 1.9 },
+            { id: 'XI-7', grade: 'XI', number: 7, name: 'Kelas XI-7', score: 4.0 },
+            { id: 'XI-8', grade: 'XI', number: 8, name: 'Kelas XI-8', score: 2.6 },
+            { id: 'XI-9', grade: 'XI', number: 9, name: 'Kelas XI-9', score: 1.1 },
+            { id: 'XI-10', grade: 'XI', number: 10, name: 'Kelas XI-10', score: 3.0 },
+            { id: 'XI-11', grade: 'XI', number: 11, name: 'Kelas XI-11', score: 2.2 },
+
+            // Angkatan XII
+            { id: 'XII-1', grade: 'XII', number: 1, name: 'Kelas XII-1', score: 1.0 },
+            { id: 'XII-2', grade: 'XII', number: 2, name: 'Kelas XII-2', score: 2.8 },
+            { id: 'XII-3', grade: 'XII', number: 3, name: 'Kelas XII-3', score: 1.7 },
+            { id: 'XII-4', grade: 'XII', number: 4, name: 'Kelas XII-4', score: 3.1 },
+            { id: 'XII-5', grade: 'XII', number: 5, name: 'Kelas XII-5', score: 0.7 },
+            { id: 'XII-6', grade: 'XII', number: 6, name: 'Kelas XII-6', score: 2.4 },
+            { id: 'XII-7', grade: 'XII', number: 7, name: 'Kelas XII-7', score: 3.9 },
+            { id: 'XII-8', grade: 'XII', number: 8, name: 'Kelas XII-8', score: 1.6 },
+            { id: 'XII-9', grade: 'XII', number: 9, name: 'Kelas XII-9', score: 2.2 },
+            { id: 'XII-10', grade: 'XII', number: 10, name: 'Kelas XII-10', score: 1.3 },
+            { id: 'XII-11', grade: 'XII', number: 11, name: 'Kelas XII-11', score: 3.4 }
+        ];
+
+        // Global State Variables
+        let classData = [];
+        let violations = [];
+        let isAdmin = false;
+        let currentTab = 'ALL'; // 'ALL', 'X', 'XI', 'XII', 'VIOLATION'
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalStorageData();
+            renderHeaderControls();
+            renderLeaderboard();
+            populateViolationSelect();
+            renderViolations();
+        });
+
+        // Load or initialize localStorage
+        function loadLocalStorageData() {
+            const storedClasses = localStorage.getItem('gemas_mbg_classes');
+            if (storedClasses) {
+                classData = JSON.parse(storedClasses);
+            } else {
+                classData = [...DEFAULT_CLASSES];
+                saveClassesToStorage();
+            }
+
+            const storedViolations = localStorage.getItem('gemas_mbg_violations');
+            if (storedViolations) {
+                violations = JSON.parse(storedViolations);
+            } else {
+                violations = [];
+            }
+
+            const storedAdmin = localStorage.getItem('gemas_mbg_admin');
+            if (storedAdmin === 'true') {
+                isAdmin = true;
+            }
+        }
+
+        function saveClassesToStorage() {
+            localStorage.setItem('gemas_mbg_classes', JSON.stringify(classData));
+        }
+
+        function saveViolationsToStorage() {
+            localStorage.setItem('gemas_mbg_violations', JSON.stringify(violations));
+        }
+
+        // Render UI Header / Admin Controls
+        function renderHeaderControls() {
+            const container = document.getElementById('admin-header-controls');
+            const accessBadge = document.getElementById('access-badge');
+            const adminActBtn = document.getElementById('admin-act-btn');
+            const adminViolationBtn = document.getElementById('admin-violation-btn');
+
+            if (isAdmin) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <span class="hidden sm:inline-block bg-yellow-300 text-yellow-950 text-xs px-2.5 py-1 rounded-lg font-bold shadow-sm">
+                            <i class="fa-solid fa-user-check"></i> Admin Active
+                        </span>
+                        <button onclick="handleLogout()" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow transition active:scale-95 flex items-center gap-1">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span class="hidden sm:inline">Logout</span>
+                        </button>
+                    </div>
+                `;
+                accessBadge.className = "inline-block mt-0.5 px-2.5 py-0.5 text-xs rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300";
+                accessBadge.innerHTML = "<i class='fa-solid fa-user-shield text-[10px]'></i> Admin Mode";
+                
+                adminActBtn.className = "px-3 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-xs rounded-xl transition active:scale-95 flex items-center gap-1.5";
+                adminActBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>`;
+                adminActBtn.onclick = handleLogout;
+
+                adminViolationBtn.classList.remove('hidden');
+            } else {
+                container.innerHTML = ``;
+                accessBadge.className = "inline-block mt-0.5 px-2.5 py-0.5 text-xs rounded-full bg-gray-200 text-gray-700 font-bold";
+                accessBadge.innerHTML = "Public View";
+
+                adminActBtn.className = "px-3 py-2 bg-gemas-500 hover:bg-gemas-500/90 text-white font-bold text-xs rounded-xl shadow transition active:scale-95 flex items-center gap-1.5";
+                adminActBtn.innerHTML = `<i class="fa-solid fa-lock"></i> <span>Login Admin</span>`;
+                adminActBtn.onclick = openLoginModal;
+
+                adminViolationBtn.classList.add('hidden');
+            }
+        }
+
+        // Render Main Leaderboard
+        function renderLeaderboard() {
+            const container = document.getElementById('leaderboard-container');
+            const totalWeightDisplay = document.getElementById('total-weight-display');
+
+            // Calculate total weight
+            const totalWeight = classData.reduce((acc, curr) => acc + (parseFloat(curr.score) || 0), 0);
+            totalWeightDisplay.textContent = totalWeight.toFixed(1) + ' Kg';
+
+            if (currentTab === 'VIOLATION') {
+                return; // Controlled by switchTab
+            }
+
+            // Filter classes
+            let filtered = classData.filter(item => {
+                if (currentTab === 'ALL') return true;
+                return item.grade === currentTab;
+            });
+
+            // CRITICAL REQUIREMENT: Sort ASCENDING (Least weight first)
+            filtered.sort((a, b) => a.score - b.score);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 bg-white rounded-2xl shadow-sm border border-gemas-400/20">
+                        <i class="fa-solid fa-folder-open text-4xl text-gemas-300 mb-2"></i>
+                        <p class="text-sm font-bold text-gray-500">Tidak ada data kelas untuk kategori ini.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((item, index) => {
+                const rank = index + 1;
+                let rankBadge = '';
+                let borderHighlight = 'border-gemas-400/30';
+                
+                // Rank Styling
+                if (rank === 1) {
+                    rankBadge = `<span class="badge-gold font-black text-xs px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm"><i class="fa-solid fa-trophy text-amber-500"></i> Juara 1</span>`;
+                    borderHighlight = 'border-amber-300 ring-2 ring-amber-200/50';
+                } else if (rank === 2) {
+                    rankBadge = `<span class="badge-silver font-black text-xs px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm"><i class="fa-solid fa-medal text-slate-400"></i> Juara 2</span>`;
+                } else if (rank === 3) {
+                    rankBadge = `<span class="badge-bronze font-black text-xs px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm"><i class="fa-solid fa-award text-amber-700"></i> Juara 3</span>`;
+                } else {
+                    rankBadge = `<span class="bg-gray-100 text-gray-600 font-bold text-xs px-2.5 py-1 rounded-xl">#${rank}</span>`;
+                }
+
+                // Check for violations flag
+                const classViolations = violations.filter(v => v.classId === item.id);
+                const hasViolation = classViolations.length > 0;
+
+                html += `
+                    <div class="bg-white rounded-2xl p-4 shadow-sm border ${borderHighlight} transition-all duration-200 hover:shadow-md flex items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl ${rank === 1 ? 'bg-gemas-100 text-amber-800' : 'bg-gemas-200 text-gemas-dark'} font-black text-sm flex items-center justify-center shrink-0">
+                                ${rank}
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-extrabold text-gemas-dark text-base sm:text-lg">${item.name}</h4>
+                                    ${rankBadge}
+                                    ${hasViolation ? `<span class="text-[10px] bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-bold flex items-center gap-1"><i class="fa-solid fa-triangle-exclamation"></i> ${classViolations.length} Laporan</span>` : ''}
+                                </div>
+                                <p class="text-xs text-gray-400 font-medium">Angkatan ${item.grade}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                <span class="text-lg sm:text-xl font-black text-gemas-dark tracking-tight">${item.score.toFixed(1)}</span>
+                                <span class="text-xs font-bold text-gray-500">Kg</span>
+                            </div>
+
+                            ${isAdmin ? `
+                                <button onclick="openEditModal('${item.id}')" title="Edit Skor Kelas" class="w-9 h-9 rounded-xl bg-gemas-100 hover:bg-gemas-300 text-gemas-dark flex items-center justify-center transition active:scale-95 shadow-sm">
+                                    <i class="fa-solid fa-pencil text-sm text-emerald-800"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Tab Switcher
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // Update Tab Button styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = 'tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-gray-600 hover:text-gemas-dark';
+            });
+
+            const activeBtn = document.getElementById(`tab-${tab}`);
+            if (activeBtn) {
+                if (tab === 'VIOLATION') {
+                    activeBtn.className = 'tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition bg-red-600 text-white shadow-sm';
+                } else {
+                    activeBtn.className = 'tab-btn flex-1 sm:flex-none px-4 py-2 text-xs sm:text-sm font-bold rounded-xl transition text-gemas-dark bg-gemas-100 shadow-sm';
+                }
+            }
+
+            const leaderboardContainer = document.getElementById('leaderboard-container');
+            const violationContainer = document.getElementById('violation-container');
+
+            if (tab === 'VIOLATION') {
+                leaderboardContainer.classList.add('hidden');
+                violationContainer.classList.remove('hidden');
+                renderViolations();
+            } else {
+                leaderboardContainer.classList.remove('hidden');
+                violationContainer.classList.add('hidden');
+                renderLeaderboard();
+            }
+        }
+
+        // Handle Admin Login
+        function openLoginModal() {
+            document.getElementById('admin-pass-input').value = '';
+            document.getElementById('login-error').classList.add('hidden');
+            document.getElementById('login-modal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.add('hidden');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const password = document.getElementById('admin-pass-input').value;
+            
+            // Password exact match "Penghuni7" as specified
+            if (password === "Penghuni7") {
+                isAdmin = true;
+                localStorage.setItem('gemas_mbg_admin', 'true');
+                closeLoginModal();
+                renderHeaderControls();
+                renderLeaderboard();
+                showToast("Berhasil login sebagai Admin!", "success");
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function handleLogout() {
+            isAdmin = false;
+            localStorage.setItem('gemas_mbg_admin', 'false');
+            renderHeaderControls();
+            renderLeaderboard();
+            showToast("Berhasil logout dari mode Admin.", "info");
+        }
+
+        // Handle Edit Score Modal
+        function openEditModal(classId) {
+            const item = classData.find(c => c.id === classId);
+            if (!item) return;
+
+            document.getElementById('edit-class-id').value = item.id;
+            document.getElementById('edit-modal-title').textContent = `Edit Skor ${item.name}`;
+            document.getElementById('edit-score-input').value = item.score;
+
+            document.getElementById('edit-score-modal').classList.remove('hidden');
+            // Auto focus input
+            setTimeout(() => {
+                document.getElementById('edit-score-input').focus();
+            }, 100);
+        }
+
+        function closeEditModal() {
+            document.getElementById('edit-score-modal').classList.add('hidden');
+        }
+
+        function saveScoreEdit(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-class-id').value;
+            const newScore = parseFloat(document.getElementById('edit-score-input').value);
+
+            if (isNaN(newScore) || newScore < 0) {
+                showToast("Masukkan angka berat yang valid!", "error");
+                return;
+            }
+
+            const itemIndex = classData.findIndex(c => c.id === id);
+            if (itemIndex !== -1) {
+                classData[itemIndex].score = newScore;
+                saveClassesToStorage();
+                renderLeaderboard();
+                closeEditModal();
+                showToast(`Skor ${classData[itemIndex].name} diperbarui menjadi ${newScore} Kg`, "success");
+            }
+        }
+
+        // Handle Violation Reporting (Admin Only)
+        function populateViolationSelect() {
+            const select = document.getElementById('violation-class-select');
+            select.innerHTML = '';
+            
+            // Sort classes by name for dropdown
+            const sortedClasses = [...classData].sort((a,b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+            sortedClasses.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.textContent = `${c.name} (Skor Saat ini: ${c.score} Kg)`;
+                select.appendChild(opt);
+            });
+        }
+
+        function openViolationModal() {
+            populateViolationSelect();
+            document.getElementById('violation-desc-input').value = '';
+            document.getElementById('violation-modal').classList.remove('hidden');
+        }
+
+        function closeViolationModal() {
+            document.getElementById('violation-modal').classList.add('hidden');
+        }
+
+        function submitViolation(e) {
+            e.preventDefault();
+            const classId = document.getElementById('violation-class-select').value;
+            const desc = document.getElementById('violation-desc-input').value.trim();
+
+            const targetClass = classData.find(c => c.id === classId);
+            if (!targetClass || !desc) return;
+
+            const newViolation = {
+                id: 'V-' + Date.now(),
+                classId: targetClass.id,
+                className: targetClass.name,
+                description: desc,
+                timestamp: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
+            };
+
+            violations.unshift(newViolation); // Add to beginning
+            saveViolationsToStorage();
+            closeViolationModal();
+            updateViolationBadge();
+            renderViolations();
+            renderLeaderboard();
+            showToast(`Laporan pelanggaran ${targetClass.name} berhasil dicatat!`, "warning");
+        }
+
+        function deleteViolation(id) {
+            if (!isAdmin) return;
+            violations = violations.filter(v => v.id !== id);
+            saveViolationsToStorage();
+            updateViolationBadge();
+            renderViolations();
+            renderLeaderboard();
+            showToast("Laporan pelanggaran dihapus", "info");
+        }
+
+        function updateViolationBadge() {
+            const badge = document.getElementById('violation-badge');
+            if (violations.length > 0) {
+                badge.textContent = violations.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function renderViolations() {
+            const container = document.getElementById('violation-list');
+            const countText = document.getElementById('violation-count-text');
+            updateViolationBadge();
+
+            countText.textContent = `${violations.length} Laporan Ditemukan`;
+
+            if (violations.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-400">
+                        <i class="fa-solid fa-circle-check text-3xl text-emerald-500 mb-2"></i>
+                        <p class="text-xs font-bold text-gray-600">Belum ada laporan pelanggaran. Semua kelas tertib!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            violations.forEach(v => {
+                html += `
+                    <div class="p-3.5 rounded-xl border border-red-100 bg-red-50/50 flex justify-between items-start gap-3">
+                        <div class="space-y-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-extrabold text-sm text-red-900">${v.className}</span>
+                                <span class="text-[10px] text-gray-500 font-medium">${v.timestamp}</span>
+                            </div>
+                            <p class="text-xs text-gray-700 font-medium">${v.description}</p>
+                        </div>
+                        ${isAdmin ? `
+                            <button onclick="deleteViolation('${v.id}')" title="Hapus Laporan" class="text-xs text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-100 transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Toast Helper
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.textContent = message;
+
+            if (type === 'success') {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400 text-base";
+            } else if (type === 'warning' || type === 'error') {
+                toastIcon.className = "fa-solid fa-triangle-exclamation text-amber-300 text-base";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-info text-blue-300 text-base";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
